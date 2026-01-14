@@ -44,7 +44,7 @@ def send_telegram_messages(bot, tg_chat_id, lessons):
         )
 
 
-def req(dvmn_api_token, tg_bot_token, tg_chat_id):
+def get_lesson_statuses(dvmn_api_token, tg_bot_token, tg_chat_id):
     url = 'https://dvmn.org/api/long_polling/'
     headers = {
         'Authorization': f'Token {dvmn_api_token}'
@@ -105,7 +105,7 @@ def main():
     tg_bot_token = env.str('TELEGRAM_BOT_TOKEN')
     tg_chat_id = env.str('TELEGRAM_CHAT_ID')
 
-    req(dvmn_api_token, tg_bot_token, tg_chat_id)
+    get_lesson_statuses(dvmn_api_token, tg_bot_token, tg_chat_id)
 
 
 if __name__ == "__main__":
