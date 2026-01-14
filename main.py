@@ -1,8 +1,9 @@
 import requests
-from environs import Env
 import time
-from pprint import pprint
 import logging
+import telegram
+from environs import Env
+from pprint import pprint
 
 
 logging.basicConfig(
@@ -12,11 +13,43 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def req(token):
+def get_status_lessons(checklist):
+    lessons = []
+
+    for attempt in checklist['new_attempts']:
+        lesson = {
+            'lesson_title': attempt['lesson_title'],
+            'lesson_url': attempt['lesson_url'],
+            'status_message': (
+                "❌ К сожалению, в работе нашлись ошибки."
+                if attempt['is_negative']
+                else "✅ Преподавателю все понравилось, можно приступать к следующему уроку!"
+            )
+        }
+        lessons.append(lesson)
+
+    return lessons
+
+
+def send_telegram_messages(bot, tg_chat_id, lessons):
+    for lesson in lessons:
+        bot.send_message(
+            chat_id=tg_chat_id,
+            text=(
+                "У вас проверили работу «Отправляем уведомления о проверке работ»\n\n"
+                f"Название урока - «{lesson['lesson_title']}»\n\n"
+                f"«{lesson['status_message']}»\n\n"
+                f"Ссылка на урок - «{lesson['lesson_url']}»"
+            )
+        )
+
+
+def req(dvmn_api_token, tg_bot_token, tg_chat_id):
     url = 'https://dvmn.org/api/long_polling/'
     headers = {
-        'Authorization': f'Token {token}'
+        'Authorization': f'Token {dvmn_api_token}'
     }
+    bot = telegram.Bot(token=tg_bot_token)
 
     timestamp = None
     logger.info('Запуск long polling')
@@ -30,7 +63,7 @@ def req(token):
             response = requests.get(
                 url,
                 headers=headers,
-                timeout=5,
+                timeout=5,  # Изменить нв 90
                 params=payload,
             )
             response.raise_for_status()
@@ -56,6 +89,9 @@ def req(token):
             timestamp = checklist['last_attempt_timestamp']
             logger.info('Найдены проверки, обновили timestamp')
 
+            lessons = get_status_lessons(checklist)
+            send_telegram_messages(bot, tg_chat_id, lessons)
+
         elif checklist['status'] == 'timeout':
             timestamp = checklist['timestamp_to_request']
             logger.debug('Обновлений нет, получили новый timestamp')
@@ -65,8 +101,11 @@ def main():
     env = Env()
     env.read_env()
 
-    dvmn_token = env.str('DVMN_TOKEN')
-    req(dvmn_token)
+    dvmn_api_token = env.str('DVMN_TOKEN')
+    tg_bot_token = env.str('TELEGRAM_BOT_TOKEN')
+    tg_chat_id = env.str('TELEGRAM_CHAT_ID')
+
+    req(dvmn_api_token, tg_bot_token, tg_chat_id)
 
 
 if __name__ == "__main__":
