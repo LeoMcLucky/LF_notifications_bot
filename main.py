@@ -3,7 +3,6 @@ import time
 import logging
 import telegram
 from environs import Env
-from pprint import pprint
 
 
 logging.basicConfig(
@@ -63,13 +62,12 @@ def get_lesson_statuses(dvmn_api_token, tg_bot_token, tg_chat_id):
             response = requests.get(
                 url,
                 headers=headers,
-                timeout=5,  # Изменить нв 90
+                timeout=90,
                 params=payload,
             )
             response.raise_for_status()
 
             checklist = response.json()
-            pprint(checklist)
 
         except requests.exceptions.ReadTimeout:
             logger.debug('ReadTimeout — сервер не прислал обновлений')
