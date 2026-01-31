@@ -5,10 +5,6 @@ import telegram
 from environs import Env
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s'
-)
 logger = logging.getLogger(__name__)
 
 
@@ -102,6 +98,11 @@ def main():
     dvmn_api_token = env.str('DVMN_TOKEN')
     tg_bot_token = env.str('TELEGRAM_BOT_TOKEN')
     tg_chat_id = env.str('TELEGRAM_CHAT_ID')
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s | %(levelname)s | %(message)s'
+    )
 
     get_lesson_statuses(dvmn_api_token, tg_bot_token, tg_chat_id)
 
