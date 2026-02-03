@@ -8,7 +8,7 @@ from environs import Env
 logger = logging.getLogger(__name__)
 
 
-def get_status_lessons(checklist):
+def parse_lesson_attempts(checklist):
     lessons = []
 
     for attempt in checklist['new_attempts']:
@@ -83,7 +83,7 @@ def get_lesson_statuses(dvmn_api_token, tg_bot_token, tg_chat_id):
             timestamp = checklist['last_attempt_timestamp']
             logger.info('Найдены проверки, обновили timestamp')
 
-            lessons = get_status_lessons(checklist)
+            lessons = parse_lesson_attempts(checklist)
             send_telegram_messages(bot, tg_chat_id, lessons)
 
         elif checklist['status'] == 'timeout':
