@@ -51,6 +51,24 @@ def get_checklist_from_api(dvmn_api_token, timestamp=None):
     return response.json()
 
 
+class TelegramLogsHandler(logging.Handler):
+
+    def __init__(self, bot, chat_id):
+        super().__init__()
+        self.bot = bot
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        try:
+            log_entry = self.format(record)
+            self.bot.send_message(
+                chat_id=self.chat_id,
+                text=log_entry
+            )
+        except Exception:
+            pass
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -63,7 +81,17 @@ def main():
     dvmn_api_token = env.str('DVMN_TOKEN')
     tg_bot_token = env.str('TELEGRAM_BOT_TOKEN')
     tg_chat_id = env.str('TELEGRAM_CHAT_ID')
+
     bot = telegram.Bot(token=tg_bot_token)
+
+    telegram_handler = TelegramLogsHandler(bot, tg_chat_id)
+    telegram_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter(
+        '%(asctime)s | %(levelname)s | %(message)s'
+    )
+    telegram_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(telegram_handler)
+    logger.critical("Бот запущен")
 
     timestamp = None
     logger.info('Запуск long polling')
@@ -98,4 +126,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        logger.exception("Бот упал с критической ошибкой")
