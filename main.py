@@ -46,7 +46,8 @@ def get_checklist_from_api(dvmn_api_token, timestamp=None):
         'Authorization': f'Token {dvmn_api_token}'
     }
     payload = {'timestamp': timestamp} if timestamp is not None else None
-    response = requests.get(url, headers=headers, timeout=90, params=payload)
+    response = requests.get(url, headers=headers,
+                            timeout=(5, None), params=payload)
     response.raise_for_status()
     return response.json()
 
@@ -109,10 +110,6 @@ def main():
             elif checklist['status'] == 'timeout':
                 timestamp = checklist['timestamp_to_request']
                 logger.debug("Обновлений нет, получили новый timestamp")
-
-        except requests.exceptions.ReadTimeout:
-            logger.debug("ReadTimeout — сервер не прислал обновлений")
-            continue
 
         except requests.exceptions.ConnectionError:
             logger.warning("Нет интернета, повтор через 5 секунд")
