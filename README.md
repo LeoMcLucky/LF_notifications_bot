@@ -39,7 +39,7 @@ TELEGRAM_CHAT_ID=your_chat_id
 
 Рекомендуется использовать [virtualenv/venv](https://docs.python.org/3/library/venv.html) для изоляции проекта. 
 
-Для запуска необходима версия [Python 3.11.*](https://www.python.org/downloads/) и младше 3.10.* так-как модуль imghdr, встроенный в старые версии Python, удалён в Python 3.13. А библиотека python-telegram-bot, всё ещё зависит от него.
+Для запуска необходима версия [Python 3.12.*](https://www.python.org/downloads/) так-как модуль imghdr, встроенный в старые версии Python, удалён в Python 3.13. А библиотека python-telegram-bot, всё ещё зависит от него.
 Затем используйте `pip` (или `pip3`, есть конфликт с Python2) для установки зависимостей:
 ```
 pip install -r requirements.txt
